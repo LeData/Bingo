@@ -1,13 +1,18 @@
 import pure_game as pg
 
-BG = pg.TableTop(2)
+players = ['Tom', 'Lulu', 'Dany', 'Rayan']
+player_boards = {name: None for name in players}
 
-for name in ['Tom', 'Lulu', 'Dany', 'Rayan']:
+mm = pg.Intermediary()
+BG = pg.TableTop(1, mm)
+
+for name in players:
     print(f'Giving {name} a sheet')
-    BG.add_player(pg.PlayerBoard(name))
-    print(BG.players[-1].sheet.board)
+    player_boards[name] = pg.PlayerBoard(name, mm)
+    BG.add_player(name)
+    print(player_boards[name].sheet.board)
 
-def play_test_round(ob):
-    ob.play_round()
-    for player in ob.players:
-        print(player.name, player.sheet.marked.astype(int).sum().sum())
+def play_test_round(master):
+    master.play_round()
+    for player, board in player_boards.items():
+        print(player, board)
