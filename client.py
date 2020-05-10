@@ -220,7 +220,7 @@ class BoardClient(PlayerBoard, ConnectionListener):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # connect to server
-        # it seems that the listener initiate a conection by itself. To confirm.
+        # it seems that the listener initiates a connection by itself. To confirm.
         # connection.connect()
         self.Connect()
         self.running = False
@@ -247,7 +247,7 @@ class BoardClient(PlayerBoard, ConnectionListener):
         called when the data passed to connection.send() contains {'action': 'startgame'}
         """
         self.running = True
-        self.num = data["player"]
+        self.playerid = data["playerid"]
         self.gameid = data["gameid"]
 
     def Network_connected(self, data):

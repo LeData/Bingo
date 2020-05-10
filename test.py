@@ -15,4 +15,4 @@ for name in players:
 def play_test_round(master):
     master.play_round()
     for player, board in player_boards.items():
-        print(player, board)
+        print(player, board.count_matches())

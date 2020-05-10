@@ -3,7 +3,7 @@ from collections import defaultdict
 import numpy as np
 
 
-class BingoSheet():
+class BingoSheet:
 
     def __init__(self, n=5):
         self.n = n
@@ -33,6 +33,21 @@ class BingoSheet():
         self.marked = np.zeros((self.n, self.n)).astype(bool)
 
 
+class DrawingMachine:
+
+    def __init__(self, n_max=75):
+        self.n_max = n_max
+        self.draws = list(np.random.choice(n_max, n_max, replace=False))
+        self.round = 0
+
+    def draw(self):
+        output = None
+        if self.round < self.n_max:
+            output = self.draws[self.round]
+            self.round += 1
+        return output
+
+
 class PlayerBoard:
 
     def __init__(self, player_name, intermediary):
@@ -46,15 +61,15 @@ class PlayerBoard:
 
     def play_round(self, number):
         match = self.sheet.add_number(number)
-        if match:
-            message = f"YAY! got it."
-        else:
-            message = f"Ohhhh :( I don't have {number}"
-        self.broadcast("react", text=message)
+        #message = f"YAY! got it." if match else f"Ohhhh :( I don't have {number}"
+        #self.broadcast("react", text=message)
+        return match
 
+    def check_win(self):
         has_won = self.sheet.check_win()
-        self.broadcast("win", result=has_won)
-        return self
+        #self.broadcast("win", result=has_won)
+        return has_won
+
 
     def count_matches(self):
         hits = self.sheet.marked.astype(int).sum().sum()
@@ -77,25 +92,6 @@ class PlayerBoard:
             **kwargs
         }
         self.broadcast_channel.collect(order=order)
-
-
-class DrawingMachine:
-
-    def __init__(self, n_max=75):
-        self.n_max = n_max
-        self.future_draws = list(np.random.choice(n_max, n_max, replace=False))
-        self.drawn = []
-        self.number_drawn = 0
-
-    def draw(self):
-        if len(self.future_draws) > 0:
-            self.drawn.append(self.future_draws.pop())
-            output = self.drawn[-1]
-            print(f"Saul Goodman: and the number is ..... {output}")
-        else:
-            print(f"Saul Goodman: Wake up old geezers! There's no numbers left.")
-            output = None
-        return output
 
 
 class TableTop:
@@ -181,6 +177,11 @@ class Intermediary:
         self.master = master
 
     def distribute(self, order):
+        """
+        sends message to
+        :param order:
+        :return:
+        """
         func_name = order.pop('action')
         func = self.player_actions[func_name]
         pass_to = order.pop('target')

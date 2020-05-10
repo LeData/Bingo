@@ -1,24 +1,26 @@
-import PodSixNet.Channel
-import PodSixNet.Server
-import funtools
+import PodSixNet.Channel as chnl
+import PodSixNet.Server as srv
+import functools
 
 from pure_game import TableTop
 from time import sleep
 
+
 def trigger_start(func):
     """
-    Decorator that starts every game in the queue of a DiceServer that pass the start condition at the end of a function
+    Decorator that starts every game in the queue of the game class
+    passes its start condition after the function has run
     """
-    @functools.wrap(func)
-    def queue_updated(self, *args, *kwargs):
-        func(self, *args, *kwargs)
+    @functools.wraps(func)
+    def queue_updated(self, *args, **kwargs):
+        func(self, *args, **kwargs)
         for game in self.queue:
             if game.check_start():
                 self._start(game)
 
     return queue_updated
 
-class ClientChannel(PodSixNet.Channel.Channel):
+class ClientChannel(chnl.Channel):
     def Network(self, data):
         """
         called every time a client  does a connection.send(data)
@@ -28,12 +30,17 @@ class ClientChannel(PodSixNet.Channel.Channel):
     def Network_XXXX(self, data):
         """
         called when the data passed to connection.send() contains {'action': 'XXXX'}
+        self._server is the instance of PodSixNet.Server.Server that the instance of this class
+        was initiated in.
         """
         self.gameid = data.pop('game_id')
         self._server.score_point_for( self.gameid, data)
 
+    def Close(self):
+        self._server.close(self.gameid)
 
-class GameServer(PodSixNet.Server.Server):
+
+class GameServer(srv.Server):
     channelClass = ClientChannel
 
     def __init__(self, game_class, *args, **kwargs):
@@ -44,15 +51,22 @@ class GameServer(PodSixNet.Server.Server):
 
     def _add_new_game_to_queue(self, length = 10):
         # create new game and add it to the queue
-        gameid = len(games) + len(queue) +1
-        self.queue[current_index] = self.game(gameid, length)
-        return gameid
+        game_id = len(self.games) + len(self.queue) +1
+        self.queue[game_id] = self.game(game_id, length)
+        return game_id
 
     def _start(self, game):
         for i, player in enumerate(game.players):
-            player.Send({"action": "startgame", "player": i, "gameid": game.game_id})
+            player.Send({"action": "startgame", "playerid": i, "gameid": game.game_id})
         self.games.append(self.queue.pop(game))
 
+    def close(self, gameid):
+        game = [a for a in self.games if a.gameid == gameid][0]
+        for player in game.players:
+            try:
+                player.Send({"action": "close"})
+            except:
+                pass
 
     @trigger_start
     def Connected(self, player_channel, gameid = None):
@@ -98,16 +112,6 @@ class GameManager:
     def check_end(self):
         self.terminated = len(VP) >= self.len
         return self.terminated
-
-
-
-
-class RandomQuestionGenerator:
-
-    def get_question(self, hotness:int = 1):
-        random_question = "What was the hottest sex you've had?"
-        return random_question
-
 
 
 print("STARTING SERVER ON LOCALHOST")
