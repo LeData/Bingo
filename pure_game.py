@@ -61,13 +61,14 @@ class PlayerBoard:
 
     def play_round(self, number):
         match = self.sheet.add_number(number)
-        #message = f"YAY! got it." if match else f"Ohhhh :( I don't have {number}"
-        #self.broadcast("react", text=message)
+        message = f"YAY! got it." if match else f"Ohhhh :( I don't have {number}"
+        self.broadcast("react", text=message)
+        self.check_win()
         return match
 
     def check_win(self):
         has_won = self.sheet.check_win()
-        #self.broadcast("win", result=has_won)
+        self.broadcast("win", result=has_won)
         return has_won
 
 

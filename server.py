@@ -115,7 +115,7 @@ class GameManager:
 
 
 print("STARTING SERVER ON LOCALHOST")
-DateServe = DiceServer()
+DateServe = GameServer(GameManager)
 while True:
-    DiceServer.Pump()
+    DateServe.Pump()
     sleep(0.01)
