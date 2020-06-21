@@ -27,14 +27,15 @@ class ClientChannel(chnl.Channel):
         """
         print(data)
 
-    def Network_XXXX(self, data):
+    def Network_claim_win(self, data):
         """
         called when the data passed to connection.send() contains {'action': 'XXXX'}
         self._server is the instance of PodSixNet.Server.Server that the instance of this class
         was initiated in.
         """
-        self.gameid = data.pop('game_id')
-        self._server.score_point_for( self.gameid, data)
+        #self.gameid = data.pop('game_id')
+        #self._server.score_point_for( self.gameid, data)
+        print("player has won")
 
     def Close(self):
         self._server.close(self.gameid)

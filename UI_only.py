@@ -5,9 +5,10 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import StringProperty, ObjectProperty, NumericProperty
 
-from ALPGames.Bingo import Game
+from ALPGames.Bingo import GameLazy
 import numpy as np
 from functools import partial
 from PodSixNet.Connection import ConnectionListener, connection
@@ -15,6 +16,15 @@ from time import sleep
 
 
 kivy.require('1.0.9')
+
+class MainWindow(Screen):
+    pass
+
+class BoardWindow(Screen):
+    pass
+
+class Windows(ScreenManager):
+    pass
 
 class BingoSquare(Button):
 
@@ -54,7 +64,7 @@ class Sheet(GridLayout):
     def __init__(self, sheet):
         self.sheet = sheet
         size = self.sheet.n
-        kwargs={'cols': size}
+        kwargs={"cols": size}
         super().__init__(**kwargs)
 
         self.board = {pos: BingoSquare(text=f'{self.sheet.board[pos]}', mark_fct = partial(self.sheet.mark,pos))
@@ -62,31 +72,68 @@ class Sheet(GridLayout):
         for box in self.board.values():
             self.add_widget(box)
 
-class PlayerView(Game):
+class PlayerView(GameLazy, ConnectionListener):
 
-    def test(self):
-        pass
+    def __init__(self, name, opponents):
+        GameLazy.__init__(self,name, opponents=opponents)
+        self.Connect()
+        self.connected = False
+
+    def listen(self):
+        connection.Pump()
+        self.Pump()
+
+    def o_claim_win(self):
+        connection.send({"action": "claim_win", "player": "me"})
+
+    def Network_startgame(self, data):
+        """
+        called when the data passed to connection.send() contains {'action': 'startgame'}
+        """
+        self.running = True
+        self.playerid = data["playerid"]
+        self.gameid = data["gameid"]
+
+    def Network_connected(self, data):
+        """
+        called when the data passed to connection.send() contains {'action': 'connected'}
+        """
+        print("connected to the server")
+        self.connected = True
+
+    def Network_error(self, data):
+        """
+        called when the data passed to connection.send() contains {'action': 'error'}
+        """
+        print("error:", data['error'][1])
+
+    def Network_disconnected(self, data):
+        """
+        called when the data passed to connection.send() contains {'action': 'disconnected'}
+        """
+        print("disconnected from the server")
+
 
 class BingoApp(PlayerView, App):
 
-    def __init__(self, players = ["Joe"]):
-        PlayerView.__init__(self, players)
+    def __init__(self, name, players = ["Joe"]):
+        PlayerView.__init__(self, name, opponents=players)
         App.__init__(self)
 
     def build(self):
-        top_banner = BoxLayout(orientation='horizontal', spacing=10, size_hint=(1, .1))
-        self.drawn = Drawn(text="O_O", font_size='40sp', size_hint=(0.15, 1))
+        top_banner = BoxLayout(orientation="horizontal", spacing=10, size_hint=(1, .1))
+        self.drawn = Drawn(text="O_O", font_size="40sp", size_hint=(0.15, 1))
         top_banner.add_widget(self.drawn)
-        claim_fct = partial(self.i_check_win, self.players['Joe'].sheets[0])
+        claim_fct = self.player.o_claim_win
         top_banner.add_widget(CheckWin(text='BINGO !',
                                      check_fct = claim_fct))
 
         self.title = 'Bingo with Saul Goodman'
         title = Label(text=self.title, size_hint=(1, .2))
 
-        g = Sheet(sheet = self.players['Joe'].sheets[0])
+        g = Sheet(sheet = self.player.sheets[0])
 
-        playZone = BoxLayout(orientation='vertical')
+        playZone = BoxLayout(orientation="vertical")
         playZone.add_widget(title)
         playZone.add_widget(top_banner)
         playZone.add_widget(g)
@@ -101,8 +148,8 @@ class BingoApp(PlayerView, App):
         self.drawn.update(self.GM.drawn_numbers[-1])
 
 
-if __name__ in ('__main__', '__android__'):
-    BingoApp().run()
+if __name__ in ("__main__", "__android__"):
+    BingoApp('me').run()
 
 """
 Copyright (c) 2012, Sylvain Alborini

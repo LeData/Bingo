@@ -1,4 +1,6 @@
 import numpy as np
+from abc import ABC, abstractmethod
+
 
 def check_tic_tac_toe(boolean_array):
     won = (boolean_array.all(axis=1).any()
@@ -8,9 +10,10 @@ def check_tic_tac_toe(boolean_array):
            )
     return won
 
-#-----------------------------------------------------------------------------------------------------------------------
-#BOTS
-#-----------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------
+# BOTS
+# -----------------------------------------------------------------------------------------------------------------------
+
 
 class GameBot():
     """
@@ -46,9 +49,10 @@ class PlayerBot:
                )
         return won
 
-#-----------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------
 # GAME COMPONENTS
-#-----------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------
+
 
 class BingoSheet:
 
@@ -88,6 +92,7 @@ class BingoSheet:
         self.board = number_array.reshape(self.n, -1)
         self.marked = np.zeros((self.n, self.n), dtype=bool)
 
+
 class DrawingMachine:
 
     def __init__(self, n_max=75, n_rounds=75):
@@ -103,21 +108,23 @@ class DrawingMachine:
             self.round_played += 1
         return output
 
-#-----------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------
 # BOARDS
-#-----------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------
+
 
 class PlayerBoardNaked:
     """
     This class is "naked", i.e. it only contains player board states. It is used to represent the other players
     on the client side.
     """
-    def __init__(self, n_sheets=1):
+    def __init__(self, name, n_sheets=1):
         """
         Defines all the variables of the board
         """
         self.sheets = [BingoSheet() for i in range(n_sheets)]
-        self.playing=True
+        self.playing = False
+        self.name = name
 
 class PlayerBoardLazy(PlayerBoardNaked):
     """
@@ -128,11 +135,7 @@ class PlayerBoardLazy(PlayerBoardNaked):
     """
 
     def o_claim_win(self):
-        """
-        Action whose result is outgoing, i.e. impacts the board or other players
-        :return:
-        """
-        return True
+        return {"action": "bingo", "player": self.name}
 
 class PlayerBoard(PlayerBoardLazy):
     """
@@ -204,10 +207,10 @@ class GameBoard(GameBoardNaked):
 
 class GameLazy:
 
-    def __init__(self, opponents):
+    def __init__(self, player, opponents):
         self.GM = GameBoardNaked()
-        self.player = PlayerBoardLazy
-        self.opponents = {opponent: PlayerBoardNaked() for opponent in opponents}
+        self.player = PlayerBoardLazy(player)
+        self.opponents = {opponent: PlayerBoardNaked(opponent) for opponent in opponents}
         self.started = False
         self.wins = []
 
