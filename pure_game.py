@@ -1,6 +1,14 @@
 import numpy as np
 
 
+class DicePure:
+
+    def __init__(self, sides):
+        self.sides = sides
+
+    def roll(self):
+        return np.random.choice(size=self.sides)
+
 class BingoSheet:
 
     def __init__(self, n=5):
