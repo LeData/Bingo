@@ -1,6 +1,7 @@
 import PodSixNet.Channel as chnl
 import PodSixNet.Server as srv
 import functools
+from collections import defaultdict
 
 from pure_game import TableTop
 from time import sleep
@@ -46,12 +47,12 @@ class GameServer(srv.Server):
     def __init__(self, game_class, *args, **kwargs):
         super().__init__(self, *args, **kwargs)
         self.game = game_class
-        self.games = {} # games that have run or are running on the server
-        self.queue = {} # open games
+        self.games = {}  # games that have run or are running on the server
+        self.queue = {}  # open games
 
-    def _add_new_game_to_queue(self, length = 10):
+    def _add_new_game_to_queue(self, length=10):
         # create new game and add it to the queue
-        game_id = len(self.games) + len(self.queue) +1
+        game_id = len(self.games) + len(self.queue) + 1
         self.queue[game_id] = self.game(game_id, length)
         return game_id
 
@@ -69,19 +70,18 @@ class GameServer(srv.Server):
                 pass
 
     @trigger_start
-    def Connected(self, player_channel, gameid = None):
+    def Connected(self, player_channel, gameid=None):
         """
         TODO: rename as new_player
         gets called whenever a new client connects to the server.
         """
-
+        game=None
         if gameid is not None:
             if gameid in self.games.keys():
                 print("this game has already started")
                 return self
             if gameid not in self.queue.keys():
                 print("No such game to join, creating one")
-                game = None
 
         if gameid is None:
             game = self._add_new_game_to_queue(player_channel)
@@ -93,20 +93,20 @@ class GameServer(srv.Server):
 
 class GameManager:
 
-    def __init__(self, gameid, length = 10):
+    def __init__(self, gameid):
         self.gameid = gameid
         self.started = False
         # initialize VP ownership
-        #initialize the player list
+        # initialize the player list
         self.players = []
-        self.scores = default_dict(int)
+        self.scores = defaultdict(int)
 
     def add_player(self, player):
         player.gameid = self.gameid
         self.players.append(player)
 
     def check_start(self):
-        self.started = self.players >=2
+        self.started = self.players >= 2
         return self.started
 
     def check_end(self):
