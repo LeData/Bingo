@@ -22,7 +22,7 @@ from os.path import dirname, join, basename, sep
 from kivy.core.window import Window
 from collections import defaultdict
 
-from pure_game import PlayerBoard
+from ./pure_game import PlayerBoard
 from PodSixNet.Connection import ConnectionListener, connection
 from time import sleep
 

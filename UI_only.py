@@ -55,16 +55,18 @@ class CheckWin(Button):
             self.disabled = True
             self.text = "FALSE ALARM"
 
+
 class Drawn(Label):
     def update(self, value):
         self.text = f"{value}"
+
 
 class Sheet(GridLayout):
 
     def __init__(self, sheet):
         self.sheet = sheet
         size = self.sheet.n
-        kwargs={"cols": size}
+        kwargs = {"cols": size}
         super().__init__(**kwargs)
 
         self.board = {pos: BingoSquare(text=f'{self.sheet.board[pos]}', mark_fct = partial(self.sheet.mark,pos))
