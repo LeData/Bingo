@@ -30,7 +30,8 @@ class PlayerBot:
     def __init__(self, board):
         self.board = board
 
-    def add_number_to(self, number, sheet):
+    @staticmethod
+    def add_number_to(number, sheet):
         if sheet.full:
             return None
         else:
@@ -41,7 +42,8 @@ class PlayerBot:
             sheet.full = sheet.marked.all().all()
             return matched
 
-    def check_win_for(self, sheet):
+    @staticmethod
+    def check_win_for(sheet):
         won = (sheet.marked.all(axis=1).any()
                or sheet.marked.all(axis=0).any()
                or np.diag(sheet.marked).all()
@@ -69,8 +71,7 @@ class BingoSheet:
     def mark(self, pos):
         """
         Marking a number/position as drawn. The position is relative to the top left corner of the sheet.
-        :param x: horizontal position, 0-indexed
-        :param y: vertical position, 0-indexed
+        :param pos: position (pair of ints)
         :return:
         """
         try:
@@ -126,6 +127,7 @@ class PlayerBoardNaked:
         self.playing = False
         self.name = name
 
+
 class PlayerBoardLazy(PlayerBoardNaked):
     """
     This class is "lazy", i.e. it does not contain any game logic that the client cannot be trusted with.
@@ -137,13 +139,14 @@ class PlayerBoardLazy(PlayerBoardNaked):
     def o_claim_win(self):
         return {"action": "bingo", "player": self.name}
 
+
 class PlayerBoard(PlayerBoardLazy):
     """
     This is the full player board class, with the game logic and all methods needed to function. It is used to represent
     all players on the server side.
     """
 
-    def s_mark(self,pos, sheet_id=0):
+    def s_mark(self, pos, sheet_id=0):
         """
         Actions that only impact the internal state of the board
         :return:
@@ -166,6 +169,7 @@ class PlayerBoard(PlayerBoardLazy):
     def i_end_round(self):
         self.playing = False
 
+
 class GameBoardNaked:
     """
     This class is "naked", i.e. it only contains game board states. It is used to represent the exposed elements of
@@ -176,6 +180,7 @@ class GameBoardNaked:
         Defines all the variables of the board
         """
         self.drawn_numbers = []
+
 
 class GameBoard(GameBoardNaked):
     """
@@ -201,9 +206,10 @@ class GameBoard(GameBoardNaked):
     def i_confirm_win(self, sheet):
         pass
 
-#-----------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------
 # GAME
-#-----------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------
+
 
 class GameLazy:
 
@@ -214,6 +220,7 @@ class GameLazy:
         self.started = False
         self.wins = []
 
+
 class Game:
     """
     This class contains the game board, the player boards and all the logic between.
@@ -221,12 +228,12 @@ class Game:
 
     def __init__(self, players):
         self.GM = GameBoard()
-        self.players = {player: PlayerBoard() for player in players}
+        self.players = {player: PlayerBoard(name='Larry') for player in players}
         self.started = False
         self.wins = []
 
     def o_start(self):
-        self.started=True
+        self.started = True
 
     def i_check_win(self, sheet):
         real_marked = np.isin(sheet.board, self.GM.drawn_numbers)

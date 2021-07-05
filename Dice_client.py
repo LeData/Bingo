@@ -24,10 +24,12 @@ from collections import defaultdict
 
 from pure_game import PlayerBoard
 from PodSixNet.Connection import ConnectionListener, connection
-from time import sleep
 
+import logging
 
 kivy.require('1.0.9')
+
+
 class Dice(Button):
     faces = ['tornado', 'strip', 'drink', '3lie', '2lie', '1lie']
     set_aside = False
@@ -70,6 +72,8 @@ class DiceLayout(GridLayout):
         kwargs['cols'] = 1 + 2 * self.dice
         super().__init__(**kwargs)
         self.countdown = 3
+        self.first = None
+        self.left = 0
 
         self.running = False
 
@@ -88,10 +92,13 @@ class DiceLayout(GridLayout):
         self.elapsed += dt
 
     def start_game(self, dt):
+        print(f"unused kwarg: {dt}")
         self.reset()
         Clock.schedule_interval(self.countdown_display, 1)
 
     def countdown_display(self, dt):
+
+        print(f"unused kwarg: {dt}")
         if self.countdown == -1:
             Clock.unschedule(self.countdown_display)
             Clock.schedule_interval(self.elapsed_time, 0.1)
@@ -115,9 +122,7 @@ class DiceLayout(GridLayout):
         self.running = True
         self.add_widget(Button(text=''))
         for i in range(self.dice):
-            btn = Dice(
-                text=""
-            )
+            btn = Dice(i, text="")
             self.add_widget(btn)
             self.add_widget(Button(text=''))
 
@@ -156,6 +161,7 @@ class LabelNb(Label):
 
 
 class LabelScore(Label):
+
     def updateTime(self, value):
         self.text = f"Score {value:.2f}"
 

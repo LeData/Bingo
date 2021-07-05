@@ -20,7 +20,9 @@ def trigger_start(func):
 
     return queue_updated
 
+
 class ClientChannel(chnl.Channel):
+
     def Network(self, data):
         """
         called every time a client  does a connection.send(data)
@@ -33,8 +35,8 @@ class ClientChannel(chnl.Channel):
         self._server is the instance of PodSixNet.Server.Server that the instance of this class
         was initiated in.
         """
-        #self.gameid = data.pop('game_id')
-        #self._server.score_point_for( self.gameid, data)
+        # self.gameid = data.pop('game_id')
+        # self._server.score_point_for( self.gameid, data)
         print("player has won")
 
     def Close(self):
@@ -70,19 +72,18 @@ class GameServer(srv.Server):
                 pass
 
     @trigger_start
-    def Connected(self, player_channel, gameid = None):
+    def Connected(self, player_channel, gameid=None):
         """
         TODO: rename as new_player
         gets called whenever a new client connects to the server.
         """
-
+        game = None
         if gameid is not None:
             if gameid in self.games.keys():
                 print("this game has already started")
                 return self
             if gameid not in self.queue.keys():
                 print("No such game to join, creating one")
-                game = None
 
         if gameid is None:
             game = self._add_new_game_to_queue(player_channel)

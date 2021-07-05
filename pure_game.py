@@ -1,5 +1,3 @@
-from random import choice, sample
-from collections import defaultdict
 import numpy as np
 
 
@@ -13,7 +11,7 @@ class BingoSheet:
         
         self.reset()
 
-    def add_number(self, number):
+    def add_number(self, number: np.array):
         matches = self.board == number
         matched = matches.any().any()
         if matched:
@@ -71,7 +69,6 @@ class PlayerBoard:
         self.broadcast("win", result=has_won)
         return has_won
 
-
     def count_matches(self):
         hits = self.sheet.marked.astype(int).sum().sum()
         return hits
@@ -82,7 +79,6 @@ class PlayerBoard:
     def broadcast(self, func_name, **kwargs):
         """
         Sends a message to the intermediary, so they relay the corresponding action to the desires players
-        :param player: individual player or 'all'
         :param func_name: type of message / action to take
         :param kwargs: list of kwargs that the message / action requires
         :return:
@@ -120,10 +116,10 @@ class TableTop:
                 else:
                     print(f"Saul Goodman: {player}, did you forget to pay the registration fee?")
                 continue
-        remaining_games = [i for i,winner in enumerate(self.VP) if winner is None]
+        remaining_games = [i for i, winner in enumerate(self.VP) if winner is None]
         if len(remaining_games) == 0:
             print("Saul Goodman: The game is finished. Thanks to all the participants")
-        #self.broadcast('all', 'game-over',)
+        # self.broadcast('all', 'game-over',)
         # TODO: broadcast/update scores on screens
 
     def play_round(self):
@@ -186,7 +182,7 @@ class Intermediary:
         func_name = order.pop('action')
         func = self.player_actions[func_name]
         pass_to = order.pop('target')
-        #print(f"Itermediary : passing {func_name} order to {pass_to}")
+        # print(f"Itermediary : passing {func_name} order to {pass_to}")
         if pass_to == 'all':
             targets = self.targets
         else:
@@ -198,7 +194,7 @@ class Intermediary:
         func_name = order.pop('action')
         func = self.master_actions[func_name]
         passed_from = order.pop('source')
-        #print(f"Itermediary : passing {func_name} order to master from {passed_from}")
+        # print(f"Itermediary : passing {func_name} order to master from {passed_from}")
         func(passed_from, **order)
 
     @staticmethod
@@ -214,6 +210,6 @@ class Intermediary:
 
     @staticmethod
     def pass_msg(source, **kwargs):
-        speaker =source
+        speaker = source
         msg = kwargs["text"]
         print(f"{speaker}: {msg}")

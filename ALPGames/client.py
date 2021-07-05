@@ -1,30 +1,18 @@
 import kivy
 from kivy.app import App
 from kivy.clock import Clock
-from kivy.uix.widget import Widget
 from kivy.uix.image import Image
 from kivy.uix.button import Button
-from kivy.uix.popup import Popup
 from kivy.uix.label import Label
-from kivy.uix.slider import Slider
-from kivy.uix.togglebutton import ToggleButton
-from kivy.core.audio import SoundLoader
 from kivy.uix.gridlayout import GridLayout
-from kivy.uix.scrollview import ScrollView
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
-from kivy.animation import Animation
-from kivy.properties import StringProperty, ObjectProperty, NumericProperty
-from kivy.uix.progressbar import ProgressBar
-from random import choice, shuffle
-from glob import glob
-from os.path import dirname, join, basename, sep
-from kivy.core.window import Window
+from kivy.properties import StringProperty, NumericProperty
+from os.path import dirname, join
 from collections import defaultdict
 
 from ./pure_game import PlayerBoard
 from PodSixNet.Connection import ConnectionListener, connection
-from time import sleep
 
 
 kivy.require('1.0.9')
@@ -66,6 +54,10 @@ class DiceLayout(GridLayout):
         kwargs['cols'] = self.size
         super().__init__(**kwargs)
         self.running = False
+        self.countdown = 2
+        self.first = None
+        self.left = 0
+        self.elapsed = 0
 
     def start_game(self, dt):
         self.reset()
