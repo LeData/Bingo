@@ -128,7 +128,7 @@ class PlayerView(GameLazy, ConnectionListener):
 class BingoApp(PlayerView, App):
 
     def __init__(self, name, players=None):
-        players = ["Joe"] if players is None else players
+        players = ["My shadow"] if players is None else players
         PlayerView.__init__(self, name, opponents=players)
         App.__init__(self)
         self.drawn = None
@@ -159,7 +159,10 @@ class BingoApp(PlayerView, App):
 
     def play_round(self, instance):
         self.new_round()
-        self.drawn.update(self.GM.drawn_numbers[-1])
+        try:
+            self.drawn.update(self.GM.drawn_numbers[-1])
+        except IndexError:
+            print("there's no number drawn in GM")
 
     def new_round(self):
         pass

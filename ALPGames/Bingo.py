@@ -181,6 +181,13 @@ class GameBoardNaked:
         """
         self.drawn_numbers = []
 
+    @property
+    def last_drawn(self):
+        try:
+            return self.drawn_numbers[-1]
+        except IndexError:
+            return 0
+
 
 class GameBoard(GameBoardNaked):
     """

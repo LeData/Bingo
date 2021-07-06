@@ -101,7 +101,7 @@ class GameManager:
         # initialize VP ownership
         #initialize the player list
         self.players = []
-        self.scores = default_dict(int)
+        self.scores = defaultdict(int)
 
     def add_player(self, player):
         player.gameid = self.gameid
