@@ -160,7 +160,7 @@ class BingoApp(PlayerView, App):
     def play_round(self, instance):
         self.new_round()
         try:
-            self.drawn.update(self.GM.drawn_numbers[-1])
+            self.drawn.update(self.GM.last_drawn)
         except IndexError:
             print("there's no number drawn in GM")
 
