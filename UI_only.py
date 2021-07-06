@@ -7,7 +7,8 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 
-from ALPGames.Bingo import GameLazy
+from ALPGames.client import PlayerView
+
 import numpy as np
 from functools import partial
 from PodSixNet.Connection import ConnectionListener, connection
@@ -76,53 +77,6 @@ class Sheet(GridLayout):
                       for pos, val in np.ndenumerate(self.sheet.board)}
         for box in self.board.values():
             self.add_widget(box)
-
-
-# noinspection PyPep8Naming
-class PlayerView(GameLazy, ConnectionListener):
-
-    def __init__(self, name, opponents):
-        GameLazy.__init__(self, name, opponents=opponents)
-        self.Connect()
-        self.connected = False
-        self.running = False
-        self.player_id = None
-        self.gameid = None
-
-    def listen(self):
-        connection.Pump()
-        self.Pump()
-
-    @staticmethod
-    def o_claim_win():
-        connection.send({"action": "claim_win", "player": "me"})
-
-    def Network_startgame(self, data):
-        """
-        called when the data passed to connection.send() contains {'action': 'startgame'}
-        """
-        self.running = True
-        self.player_id = data["playerid"]
-        self.gameid = data["gameid"]
-
-    def Network_connected(self, data):
-        """
-        called when the data passed to connection.send() contains {'action': 'connected'}
-        """
-        print("connected to the server")
-        self.connected = True
-
-    def Network_error(self, data):
-        """
-        called when the data passed to connection.send() contains {'action': 'error'}
-        """
-        print("error:", data['error'][1])
-
-    def Network_disconnected(self, data):
-        """
-        called when the data passed to connection.send() contains {'action': 'disconnected'}
-        """
-        print("disconnected from the server")
 
 
 class BingoApp(PlayerView, App):

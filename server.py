@@ -64,7 +64,7 @@ class GameServer(srv.Server):
         self.games.append(self.queue.pop(game))
 
     def close(self, gameid):
-        game = [a for a in self.games if a.gameid == gameid][0]
+        game = [a for a in self.games if a.game_id == gameid][0]
         for player in game.players:
             try:
                 player.Send({"action": "close"})
@@ -104,7 +104,7 @@ class GameManager:
         self.scores = defaultdict(int)
 
     def add_player(self, player):
-        player.gameid = self.gameid
+        player.game_id = self.gameid
         self.players.append(player)
 
     def check_start(self):

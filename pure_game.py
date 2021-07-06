@@ -221,3 +221,4 @@ class Intermediary:
         speaker = source
         msg = kwargs["text"]
         print(f"{speaker}: {msg}")
+

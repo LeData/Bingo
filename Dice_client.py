@@ -73,7 +73,9 @@ class DiceLayout(GridLayout):
             if f_count >= 3:
                 print('WIN')
                 self.action_screen(face)
-                parent.Send({"action": 'action', "player": parent.player_name, "face": face})
+                self.parent.Send({"action": "action",
+                                  "player": self.parent.player_name,
+                                  "face": face})
 
     @staticmethod
     def action_screen(face):

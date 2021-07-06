@@ -1,5 +1,4 @@
 import numpy as np
-from abc import ABC, abstractmethod
 
 
 def check_tic_tac_toe(boolean_array):
@@ -208,7 +207,6 @@ class GameBoard(GameBoardNaked):
         """
         number_drawn = self.machine.draw()
         self.drawn_numbers.append(number_drawn)
-        return number_drawn
 
     def i_confirm_win(self, sheet):
         pass
@@ -260,3 +258,4 @@ class Game:
 
     def s_reset(self):
         pass
+

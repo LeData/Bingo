@@ -12,6 +12,7 @@ from os.path import dirname, join
 from collections import defaultdict
 
 from pure_game import PlayerBoard
+from ALPGames.Bingo import GameLazy
 from PodSixNet.Connection import ConnectionListener, connection
 
 
@@ -81,6 +82,7 @@ class DiceLayout(GridLayout):
         self.reset()
         Clock.schedule_interval(self.countdown_display, 1)
 
+
 class LabelDraw(Label):
     def updatedraw(self, value):
         self.text = f"{value}"
@@ -95,9 +97,9 @@ class BingoApp(App):
 
         top_banner = BoxLayout(orientation='horizontal', spacing=10, size_hint=(1, .1))
         drawn = LabelDraw(text="Last Drawn:  0", size_hint=(0.15, 1))
-        config.add_widget(drawn)
+        top_banner.add_widget(drawn)
         missed = DeclareBingo()
-        config.add_widget(missed)
+        top_banner.add_widget(missed)
 
         shield = DiceLayout(dice=1, size_hint=(1, .35))
         Clock.schedule_once(shield.start_game, 3)
@@ -160,6 +162,53 @@ class BoardClient(PlayerBoard, ConnectionListener):
         called when the data passed to connection.send() contains {'action': 'connected'}
         """
         print("connected to the server")
+
+    def Network_error(self, data):
+        """
+        called when the data passed to connection.send() contains {'action': 'error'}
+        """
+        print("error:", data['error'][1])
+
+    def Network_disconnected(self, data):
+        """
+        called when the data passed to connection.send() contains {'action': 'disconnected'}
+        """
+        print("disconnected from the server")
+
+# noinspection PyPep8Naming
+class PlayerView(GameLazy, ConnectionListener):
+
+    def __init__(self, name, opponents):
+        GameLazy.__init__(self, name, opponents=opponents)
+        self.Connect()
+        self.connected = False
+        self.running = False
+        self.player_id = None
+        self.game_id = None
+
+    def listen(self):
+        connection.Pump()
+        self.Pump()
+
+    @staticmethod
+    def o_claim_win():
+        connection.send({"action": "claim_win",
+                         "player": "me"})
+
+    def Network_startgame(self, data):
+        """
+        called when the data passed to connection.send() contains {'action': 'startgame'}
+        """
+        self.running = True
+        self.player_id = data["playerid"]
+        self.game_id = data["gameid"]
+
+    def Network_connected(self, data):
+        """
+        called when the data passed to connection.send() contains {'action': 'connected'}
+        """
+        print("connected to the server")
+        self.connected = True
 
     def Network_error(self, data):
         """
