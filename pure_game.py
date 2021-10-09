@@ -3,11 +3,18 @@ import numpy as np
 
 class DicePure:
 
-    def __init__(self, sides):
-        self.sides = sides
+    def __init__(self, sides: int):
+        self.sides = list(range(sides))
+        self.locked = False
+        self._state = self.sides[0]
+
+    @property
+    def state(self):
+        return self._state
 
     def roll(self):
-        return np.random.choice(size=self.sides)
+        self._state = np.random.choice(self.sides)
+        return self.state
 
 class BingoSheet:
 

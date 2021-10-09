@@ -14,7 +14,7 @@ from glob import glob
 from os.path import dirname, join
 from collections import defaultdict
 
-from pure_game import PlayerBoard
+from pure_game import PlayerBoard, Intermediary, DicePure
 from PodSixNet.Connection import ConnectionListener, connection
 
 
@@ -29,7 +29,7 @@ class Dice(Button):
     sound = ObjectProperty(None)
     background_normal = StringProperty(join(dirname(__file__), "icons", f'{faces[0]}.png'))
 
-    def __init__(self, dice, **kwargs):
+    def __init__(self, dice: DicePure, **kwargs):
         self.dice_pure = dice
         super(Dice, self).__init__(**kwargs)
 
@@ -39,7 +39,7 @@ class Dice(Button):
 
     def roll(self):
         self.dice_pure.roll()
-        self.side = self.dice_pure.side
+        self.side = str(self.dice_pure.state)
         # TODO: add the broadcast of the result
 
     def on_press(self):
@@ -115,9 +115,9 @@ class DiceLayout(GridLayout):
         self.running = True
         self.add_widget(Button(text=''))
         for i in range(self.dice):
-            btn = Dice(i, text="")
+            btn = Dice(DicePure(6), text="")
             self.add_widget(btn)
-            self.add_widget(Button(text=''))
+            self.add_widget(Button(text='', disabled=True))
 
     def restartGame(self):
         self.reset()
@@ -155,13 +155,16 @@ class LabelNb(Label):
 
 class LabelScore(Label):
 
-    def updateTime(self, value):
-        self.text = f"Score {value:.2f}"
+    def updateTime(self, value, dt):
+        try:
+            self.text = f"Score {value:.2f}, dt:{dt:.2f}"
+        except TypeError:
+            self.text = f"error: value:{value}, dt:{dt}"
 
 
 class LabelMissed(Label):
     def update(self, value):
-        self.text = "Missed: {value}"
+        self.text = f"Missed: {value}"
 
 
 def loadData():
@@ -176,12 +179,13 @@ class MyAnimalsApp(App):
 
     def build(self):
         self.icon = 'memoIcon.png'
-        self.title = 'The Datonator'
+        self.title = 'Roll Me Closer`'
         global sounds, icons
         sounds, icons = loadData()
         # showmissingSounds()
 
-        board_pure = BoardClient('joe', connection)
+        self.intermediary = Intermediary()
+        board_pure = BoardClient('joe', intermediary=self.intermediary)
         Clock.schedule_interval(board_pure.listen, 0.1)
 
         config = BoxLayout(orientation='horizontal', spacing=10, size_hint=(1, .1))
@@ -198,7 +202,8 @@ class MyAnimalsApp(App):
         g = DiceLayout(dice=4, size_hint=(1, .35))
         Clock.schedule_once(g.start_game, 3)
         g.bind(elapsed=score.updateTime)
-        g.bind(missed=missed.update)
+        # what is this binding supposed to do?
+        #g.bind(missed=missed.update)
 
         playZone = BoxLayout(orientation='vertical')
         playZone.add_widget(shield)
@@ -224,7 +229,7 @@ class BoardClient(PlayerBoard, ConnectionListener):
         self.Connect()
         self.running = False
 
-    def listen(self):
+    def listen(self, dt):
         self.Pump()
         connection.Pump()
 

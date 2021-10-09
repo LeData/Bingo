@@ -87,6 +87,8 @@ class LabelDraw(Label):
     def updatedraw(self, value):
         self.text = f"{value}"
 
+def DeclareBingo():
+    raise NotImplementedError("This feature has not been implemented yet.")
 
 class BingoApp(App):
 
@@ -112,7 +114,7 @@ class BingoApp(App):
         playZone.add_widget(shield)
         playZone.add_widget(title)
         playZone.add_widget(g)
-        playZone.add_widget(config)
+        #playZone.add_widget(config)
 
         widgetTree = FloatLayout()
         widgetTree.add_widget(
